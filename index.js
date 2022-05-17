@@ -1,8 +1,15 @@
-const app = require("express")();
-const server = require("http").createServer(app);
-const cors = require("cors");
 
-const io = require("socket.io")(server, {
+const app = require("express")();
+const httpServer = require("http").createServer(app);
+const cors = require("cors");
+const path = require("path")
+const fs = require("fs");
+
+const privateKey  = fs.readFileSync('key.pem');
+const certificate = fs.readFileSync('cert.pem');
+
+
+const io = require("socket.io")(httpServer, {
 	cors: {
 		origin: "*",
 		methods: [ "GET", "POST" ]
@@ -19,6 +26,7 @@ app.get('/', (req, res) => {
 
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
+    console.log('in connect')
 
 	socket.on("disconnect", () => {
 		socket.broadcast.emit("callEnded")
@@ -33,4 +41,4 @@ io.on("connection", (socket) => {
 	});
 });
 
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+httpServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
