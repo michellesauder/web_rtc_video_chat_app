@@ -8,8 +8,19 @@ const fs = require("fs");
 const privateKey  = fs.readFileSync('key.pem');
 const certificate = fs.readFileSync('cert.pem');
 
+console.log({certificate})
 
-const io = require("socket.io")(httpServer, {
+const credentials = { 
+    key: privateKey, 
+    cert: certificate, 
+    requestCert: false, 
+    rejectUnauthorized: false,
+    ca: 'csr.csr'
+};
+
+const httpsServer = require("https").createServer(credentials, app);
+
+const io = require("socket.io")(httpsServer, {
 	cors: {
 		origin: "*",
 		methods: [ "GET", "POST" ]
@@ -26,7 +37,7 @@ app.get('/', (req, res) => {
 
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
-    console.log('in connect')
+    console.log('in connect - id:', socket.id)
 
 	socket.on("disconnect", () => {
 		socket.broadcast.emit("callEnded")
@@ -41,4 +52,4 @@ io.on("connection", (socket) => {
 	});
 });
 
-httpServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+httpsServer.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
