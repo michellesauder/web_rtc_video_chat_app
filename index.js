@@ -1,6 +1,4 @@
-
 const app = require("express")();
-const httpServer = require("http").createServer(app);
 const cors = require("cors");
 const fs = require("fs");
 
